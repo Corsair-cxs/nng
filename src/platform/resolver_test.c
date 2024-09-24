@@ -11,6 +11,8 @@
 #include "core/nng_impl.h"
 
 #include <nuts.h>
+#include <arpa/inet.h> // for ntohl
+
 
 #ifdef NNG_ENABLE_IPV6
 uint8_t v6loop[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
@@ -48,6 +50,15 @@ test_google_dns(void)
 	NUTS_PASS(nng_aio_result(aio));
 	NUTS_TRUE(sa.s_in.sa_family == NNG_AF_INET);
 	NUTS_TRUE(sa.s_in.sa_port == nuts_be16(80));
+
+// 打印解析的 IP 地址
+	uint32_t addr = ntohl(sa.s_in.sa_addr);
+	printf("sa_addr: %u.%u.%u.%u\n",
+		(addr >> 24) & 0xFF,
+		(addr >> 16) & 0xFF,
+		(addr >> 8) & 0xFF,
+		addr & 0xFF);
+
 	NUTS_TRUE(sa.s_in.sa_addr == 0x08080808); // aka 8.8.8.8
 	nng_aio_free(aio);
 }
